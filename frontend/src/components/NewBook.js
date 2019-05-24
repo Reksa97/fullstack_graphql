@@ -1,24 +1,27 @@
 import React, { useState } from 'react'
 
-const NewBook = (props) => {
+const NewBook = ({ addBook, show }) => {
   const [title, setTitle] = useState('')
-  const [author, setAuhtor] = useState('')
+  const [author, setAuthor] = useState('')
   const [published, setPublished] = useState('')
   const [genre, setGenre] = useState('')
   const [genres, setGenres] = useState([])
 
-  if (!props.show) {
+  if (!show) {
     return null
   }
 
   const submit = async (e) => {
     e.preventDefault()
     
-    console.log('add book...')
+    const publishedInt = parseInt(published)
+    await addBook({
+      variables: { title, author, published: publishedInt, genres }
+    })
 
     setTitle('')
     setPublished('')
-    setAuhtor('')
+    setAuthor('')
     setGenres([])
     setGenre('')
   }
@@ -42,7 +45,7 @@ const NewBook = (props) => {
           author
           <input
             value={author}
-            onChange={({ target }) => setAuhtor(target.value)}
+            onChange={({ target }) => setAuthor(target.value)}
           />
         </div>
         <div>
