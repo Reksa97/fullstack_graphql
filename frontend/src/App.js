@@ -60,16 +60,10 @@ mutation editAuthor($name: String!, $birthyear: Int!) {
 `
 
 const App = () => {
-    const [errorMessage, setErrorMessage] = useState(null)
-
-    const handleError = (error) => {
-        setErrorMessage(error.graphQLErrors[0].message)
-        setTimeout(() => {
-            setErrorMessage(null)
-        }, 10000)
-    }
-
     const [page, setPage] = useState('authors')
+
+    const handleError = () => {
+    }
 
     const authorsResult = useQuery(ALL_AUTHORS)
     const booksResult = useQuery(ALL_BOOKS)
@@ -86,34 +80,29 @@ const App = () => {
 
     return (
         <div>
-            {errorMessage &&
-                <div style={{ color: 'red' }}>
-                    {errorMessage}
-                </div>
-            }
-        <button onClick={() => setPage('authors')}>authors</button>
-        <button onClick={() => setPage('books')}>books</button>
-        <button onClick={() => setPage('add')}>add book</button>
+            <button onClick={() => setPage('authors')}>authors</button>
+            <button onClick={() => setPage('books')}>books</button>
+            <button onClick={() => setPage('add')}>add book</button>
 
-        <Authors
-            show={page === 'authors'}
-            result={authorsResult}
-        />
-        <SetBirthyear
-            show={page === 'authors'}
-            editAuthor={editAuthor}
-        />
+            <Authors
+                show={page === 'authors'}
+                result={authorsResult}
+            />
+            <SetBirthyear
+                show={page === 'authors'}
+                editAuthor={editAuthor}
+                result={authorsResult}
+            />
 
-        <Books
-            show={page === 'books'}
-            result={booksResult}
-        />
+            <Books
+                show={page === 'books'}
+                result={booksResult}
+            />
 
-        <NewBook
-            show={page === 'add'}
-            addBook={addBook}
-        />
-
+            <NewBook
+                show={page === 'add'}
+                addBook={addBook}
+            />
     </div >
   )
 }

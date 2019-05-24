@@ -1,11 +1,10 @@
 import React, { useState } from 'react'
 
-const SetBirthyear = ({ editAuthor, show }) => {
+const SetBirthyear = ({ editAuthor, show, result }) => {
     const [name, setName] = useState('')
     const [birthyear, setBirthyear] = useState('')
 
-
-    if (!show) {
+    if (!show || result.loading) {
         return null
     }
 
@@ -20,16 +19,18 @@ const SetBirthyear = ({ editAuthor, show }) => {
         setBirthyear('')
     }
 
+    let authors = result.data.allAuthors.map(a => a.name)
     return (
         <div>
             <h2>set birthyear</h2>
             <form onSubmit={submit}>
                 <div>
                     name
-                    <input
-                        value={name}
-                        onChange={({ target }) => setName(target.value)}
-                    />
+                    <select onChange={({ target }) => setName(target.value)}>
+                        {authors.map(a =>
+                            <option key={a} value={a} >{a}</option>
+                        )}
+                    </select>
                 </div>
                 <div>
                     born
