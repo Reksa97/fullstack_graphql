@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-const NewBook = ({ addBook, show }) => {
+const NewBook = ({ addBook, show, setError }) => {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [published, setPublished] = useState('')
@@ -15,9 +15,14 @@ const NewBook = ({ addBook, show }) => {
     e.preventDefault()
     
     const publishedInt = parseInt(published)
-    await addBook({
-      variables: { title, author, published: publishedInt, genres }
-    })
+    try {
+      await addBook({
+        variables: { title, author, published: publishedInt, genres }
+      })
+    } catch (err) {
+      setError('Failed to add book')
+    }
+    
 
     setTitle('')
     setPublished('')

@@ -61,20 +61,23 @@ mutation editAuthor($name: String!, $birthyear: Int!) {
 
 const App = () => {
     const [page, setPage] = useState('authors')
+    const [errorMessage, setErrorMessage] = useState(null)
 
-    const handleError = () => {
+    const setError = (errorMessage) => {
+      setErrorMessage(errorMessage)
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 10000)
     }
 
     const authorsResult = useQuery(ALL_AUTHORS)
     const booksResult = useQuery(ALL_BOOKS)
 
     const addBook = useMutation(CREATE_BOOK, {
-        onError: handleError,
         refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }]
     })
 
     const editAuthor = useMutation(EDIT_AUTHOR, {
-        onError: handleError,
         refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }]
     })
 
@@ -84,6 +87,12 @@ const App = () => {
             <button onClick={() => setPage('books')}>books</button>
             <button onClick={() => setPage('add')}>add book</button>
 
+            {errorMessage &&
+              <div style={{ color: 'red' }}>
+                 {errorMessage}
+              </div>
+            }
+
             <Authors
                 show={page === 'authors'}
                 result={authorsResult}
@@ -92,6 +101,7 @@ const App = () => {
                 show={page === 'authors'}
                 editAuthor={editAuthor}
                 result={authorsResult}
+                setError={setError}
             />
 
             <Books
@@ -102,6 +112,7 @@ const App = () => {
             <NewBook
                 show={page === 'add'}
                 addBook={addBook}
+                setError={setError}
             />
     </div >
   )
