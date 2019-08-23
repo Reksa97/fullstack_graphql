@@ -1,9 +1,13 @@
-const { ApolloServer, UserInputError, gql } = require('apollo-server')
-const uuid = require('uuid/v1')
+const { ApolloServer, UserInputError, AuthenticationError, gql } = require('apollo-server')
+//const uuid = require('uuid/v1')
 const mongoose = require('mongoose')
+const jwt = require('jsonwebtoken')
 const Book = require('./models/book')
 const Author = require('./models/author')
+const User = require('./models/user')
 const { MONGODB_URI } = require('./config')
+
+const JWT_SECRET = 'VERY_SECRET_KEY_HERE_YESS'
 
 mongoose.set('useFindAndModify', false)
 console.log('connecting to', MONGODB_URI)
@@ -99,6 +103,16 @@ let books = [
 ]
 
 const typeDefs = gql`
+  type User {
+    username: String!
+    favoriteGenre: String!
+    id: ID!
+  }
+
+  type Token {
+    value: String!
+  }
+
   type Book {
     title: String!
     published: Int!
@@ -119,6 +133,7 @@ const typeDefs = gql`
     authorCount: Int!
     allBooks(author: String, genre: String): [Book!]!
     allAuthors: [Author!]!
+    me: User
   }
 
   type Mutation {
@@ -128,10 +143,21 @@ const typeDefs = gql`
       published: Int!
       genres: [String!]!
     ): Book
+
     editAuthor(
       name: String!
       setBornTo: Int!
     ): Author
+
+    login(
+      username: String!
+      password: String!
+    ): Token
+
+    createUser(
+      username: String!
+      favoriteGenre: String!
+    ): User
   }
 `
 
@@ -172,10 +198,17 @@ const resolvers = {
     allAuthors: async () => {
       authors = await Author.find({})
       return await authors
+    },
+    me: async (root, args, context) => {
+      return context.currentUser
     }
   },
   Mutation: {
-    addBook: async (root, args) => {
+    addBook: async (root, args, { currentUser }) => {
+      if (!currentUser) {
+        throw new AuthenticationError('User has not authenticated')
+      }
+
       let author = await Author.findOne({ name: args.author })
       if (!author) {
         author = new Author({ name: args.author })
@@ -198,7 +231,11 @@ const resolvers = {
       }
       return book
     },
-    editAuthor: async (root, args) => {
+    editAuthor: async (root, args, { currentUser }) => {
+      if (!currentUser) {
+        throw new AuthenticationError('User has not authenticated')
+      }
+
       let author = await Author.findOne({ name: args.name})
       console.log('editing author', author, args)
       author.born = args.setBornTo
@@ -210,6 +247,30 @@ const resolvers = {
         })
       }
       return author
+    },
+    createUser: async (root, args) => {
+      const user = new User({ username: args.username, favoriteGenre: args.favoriteGenre })
+      console.log('creating user', user)
+      try {
+        await user.save()
+      } catch (err) {
+        throw new UserInputError(err.message, {
+          invalidArgs: args
+        })
+      }
+      return user
+    },
+    login: async (root, args) => {
+      const user = await User.findOne({ username: args.username })
+      if ( !user || args.password !== 'password') {
+        throw new UserInputError('invalid credentials')
+      }
+      const userForToken = {
+        username: user.username,
+        id: user._id
+      }
+
+      return { value: jwt.sign(userForToken, JWT_SECRET) }
     }
   },
   Author: {
@@ -229,6 +290,16 @@ const resolvers = {
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  context: async ({ req }) => {
+    const auth = req ? req.headers.authorization : null
+    if (auth && auth.toLowerCase().startsWith('bearer ')) {
+      const decodedToken = jwt.verify(
+        auth.substring(7), JWT_SECRET
+      )
+      const currentUser = await User.findById(decodedToken.id)
+      return { currentUser }
+    }
+  }
 })
 
 server.listen().then(({ url }) => {
