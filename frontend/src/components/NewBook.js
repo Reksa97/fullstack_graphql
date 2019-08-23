@@ -21,7 +21,6 @@ const NewBook = ({ addBook, show, setError }) => {
       })
     } catch (err) {
       setError('Failed to add book')
-      console.log(err)
     }
 
     setTitle('')

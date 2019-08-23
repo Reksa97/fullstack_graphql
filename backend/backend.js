@@ -1,4 +1,4 @@
-const { ApolloServer, gql } = require('apollo-server')
+const { ApolloServer, UserInputError, gql } = require('apollo-server')
 const uuid = require('uuid/v1')
 const mongoose = require('mongoose')
 const Book = require('./models/book')
@@ -176,16 +176,15 @@ const resolvers = {
   },
   Mutation: {
     addBook: async (root, args) => {
-      console.log('adding book', args)
       let author = await Author.findOne({ name: args.author })
       if (!author) {
-        console.log('adding and didnt find author')
         author = new Author({ name: args.author })
         try {
           await author.save()
         } catch (err) {
-          console.log('cant save author', err)
-          return
+          throw new UserInputError(err.message, {
+            invalidArgs: args
+          })
         }
       }
       
@@ -193,8 +192,9 @@ const resolvers = {
       try {
         await book.save();
       } catch (err) {
-        console.log('cant save book', err)
-        return
+        throw new UserInputError(err.message, {
+          invalidArgs: args
+        })
       }
       return book
     },
@@ -202,22 +202,25 @@ const resolvers = {
       let author = await Author.findOne({ name: args.name})
       console.log('editing author', author, args)
       author.born = args.setBornTo
-      return await author.save()
+      try {
+        await author.save()
+      } catch (err) {
+        throw new UserInputError(err.message, {
+          invalidArgs: args
+        })
+      }
+      return author
     }
   },
   Author: {
     bookCount: async (root, args) => {
-      //console.log('getting book count', root.id)
       const authorBooks = await Book.find({ author: root.id })
-      //console.log('author books', root.id, authorBooks)
       return authorBooks.length
     }
   },
   Book: {
     author: async (root, args) => {
-      //console.log('finding author for book', root.author)
       const bookAuthor = await Author.findOne({ _id: root.author })
-      //console.log('found author', bookAuthor)
       return bookAuthor
     }
   }

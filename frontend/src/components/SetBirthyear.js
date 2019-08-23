@@ -29,11 +29,10 @@ const SetBirthyear = ({ editAuthor, show, result, setError }) => {
 
     let authors = result.data.allAuthors || []
     authors = authors.map(a => a.name)
-    //console.log('name', name)
     if (authors && name && name.length === 0) {
         setName(authors[0])
     }
-    //console.log(name)
+
     return (
         <div>
             <h2>set birthyear</h2>
