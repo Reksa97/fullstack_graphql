@@ -1,5 +1,4 @@
 const { ApolloServer, UserInputError, AuthenticationError, gql } = require('apollo-server')
-//const uuid = require('uuid/v1')
 const mongoose = require('mongoose')
 const jwt = require('jsonwebtoken')
 const Book = require('./models/book')

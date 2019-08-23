@@ -37,23 +37,31 @@ const SetBirthyear = ({ editAuthor, show, result, setError }) => {
         <div>
             <h2>set birthyear</h2>
             <form onSubmit={submit}>
-                <div>
-                    name
-                    <select onChange={({ target }) => {setName(target.value)}}>
-                        <option>Choose a name</option>
-                        {authors.map(a =>
-                            <option key={a} value={a} >{a}</option>
-                        )}
-                    </select>
-                </div>
-                <div>
-                    born in
-                    <input
-                        type='number'
-                        value={birthyear}
-                        onChange={({ target }) => setBirthyear(target.value)}
-                    />
-                </div>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>name</td>
+                            <td>
+                                <select onChange={({ target }) => { setName(target.value) }}>
+                                    <option>Choose a name</option>
+                                    {authors.map(a =>
+                                        <option key={a} value={a} >{a}</option>
+                                    )}
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>born in</td>
+                            <td>
+                                <input
+                                    type='number'
+                                    value={birthyear}
+                                    onChange={({ target }) => setBirthyear(target.value)}
+                                />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
                 <button type='submit'>update author</button>
             </form>
         </div>

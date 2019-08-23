@@ -17,13 +17,9 @@ const Authors = ({ result, show }) => {
       <table>
         <tbody>
           <tr>
-            <th></th>
-            <th>
-              born
-            </th>
-            <th>
-              books
-            </th>
+            <th>name</th>
+            <th>born</th>
+            <th>books</th>
           </tr>
           {authors.map(a =>
             <tr key={a.name}>
