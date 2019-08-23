@@ -4,7 +4,7 @@ const Authors = ({ result, show }) => {
   if (!show) {
     return null
   }
-  const authors = result.data.allAuthors
+  const authors = result.data.allAuthors || []
 
   if (result.loading) {
     return(

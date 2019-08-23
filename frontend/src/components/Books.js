@@ -1,11 +1,11 @@
 import React from 'react'
 
-const Books = ({ result, show}) => {
+const Books = ({ result, show }) => {
   if (!show) {
     return null
   }
 
-  const books = result.data.allBooks
+  const books = result.data.allBooks || []
 
   if (result.loading) {
     return (
@@ -20,19 +20,25 @@ const Books = ({ result, show}) => {
       <table>
         <tbody>
           <tr>
-            <th></th>
+            <th>
+              title
+            </th>
             <th>
               author
             </th>
             <th>
               published
             </th>
+            <th>
+              genres
+            </th>
           </tr>
-          {books.map(a =>
-            <tr key={a.title}>
-              <td>{a.title}</td>
-              <td>{a.author}</td>
-              <td>{a.published}</td>
+          {books.map(b =>
+            <tr key={b.title}>
+              <td>{b.title}</td>
+              <td>{b.author.name}</td>
+              <td>{b.published}</td>
+              <td>{b.genres.join(", ")}</td>
             </tr>
           )}
         </tbody>
