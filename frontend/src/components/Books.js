@@ -1,11 +1,13 @@
-import React from 'react'
+import React, { useState } from 'react'
 
-const Books = ({ result, show }) => {
+const Books = ({ result, genresResult, show }) => {
+    const [genre, setGenre] = useState('')
     if (!show) {
         return null
     }
 
-    const books = result.data.allBooks || []
+    let books = result.data.allBooks || []
+    const genres = result.data.allGenres || []
 
     if (result.loading) {
         return (
@@ -13,10 +15,19 @@ const Books = ({ result, show }) => {
         )
     }
 
+    if (genre) {
+        books = books.filter(book => book.genres.includes(genre))
+    }
+
     return (
         <div>
             <h2>books</h2>
-
+            <select onChange={({ target }) => { setGenre(target.value) }}>
+                <option value=''>Choose a name</option>
+                {genres.map(a =>
+                    <option key={a} value={a} >{a}</option>
+                )}
+            </select>
             <table>
                 <tbody>
                     <tr>

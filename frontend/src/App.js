@@ -19,7 +19,7 @@ const ALL_AUTHORS = gql`
 }
 `
 
-const ALL_BOOKS = gql`
+const ALL_BOOKS_AND_GENRES = gql`
 {
   allBooks {
     title
@@ -30,6 +30,7 @@ const ALL_BOOKS = gql`
     }
     genres
   }
+  allGenres
 }
 `
 
@@ -84,18 +85,18 @@ const App = () => {
     }
 
     const authorsResult = useQuery(ALL_AUTHORS)
-    const booksResult = useQuery(ALL_BOOKS)
+    const booksResult = useQuery(ALL_BOOKS_AND_GENRES)
 
     const addBook = useMutation(CREATE_BOOK, {
-        refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }]
+        refetchQueries: [{ query: ALL_BOOKS_AND_GENRES }, { query: ALL_AUTHORS }]
     })
 
     const editAuthor = useMutation(EDIT_AUTHOR, {
-        refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }]
+        refetchQueries: [{ query: ALL_BOOKS_AND_GENRES }, { query: ALL_AUTHORS }]
     })
 
     const login = useMutation(LOGIN, {
-        refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }]
+        refetchQueries: [{ query: ALL_BOOKS_AND_GENRES }, { query: ALL_AUTHORS }]
     })
 
     return (
