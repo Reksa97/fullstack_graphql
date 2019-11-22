@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { gql } from 'apollo-boost'
-import { useQuery, useMutation, useApolloClient } from 'react-apollo-hooks'
+import { useQuery, useMutation, useApolloClient, useSubscription } from 'react-apollo-hooks'
 
 import Authors from './components/Authors'
 import SetBirthyear from './components/SetBirthyear'
@@ -9,6 +9,17 @@ import NewBook from './components/NewBook'
 import Recommendations from './components/Recommendations'
 import Login from './components/Login'
 
+const BOOK_DETAILS = gql`
+fragment BookDetails on Book {
+  title
+  published
+  id
+  author {
+    name
+  }
+  genres
+}
+`
 
 const ALL_AUTHORS = gql`
 {
@@ -24,30 +35,20 @@ const ALL_AUTHORS = gql`
 const ALL_BOOKS_AND_GENRES = gql`
 {
   allBooks {
-    title
-    published
-    id
-    author {
-      name
-    }
-    genres
+    ...BookDetails
   }
   allGenres
 }
+${BOOK_DETAILS}
 `
 
 const BOOKS_WITH_GENRE = gql`
 query books($genre: String) {
   allBooks(genre: $genre) {
-    title
-    published
-    id
-    author {
-      name
-    }
-    genres
+    ...BookDetails
   }
 }
+${BOOK_DETAILS}
 `
 
 const CREATE_BOOK = gql`
@@ -98,6 +99,15 @@ query me {
 }
 `
 
+const BOOK_ADDED = gql`
+subscription {
+  bookAdded {
+    ...BookDetails
+  }
+}
+${BOOK_DETAILS}
+`
+
 const App = () => {
     const client = useApolloClient()
     const [page, setPage] = useState('authors')
@@ -125,6 +135,13 @@ const App = () => {
 
     const login = useMutation(LOGIN, {
         refetchQueries: [{ query: ALL_BOOKS_AND_GENRES }, { query: ALL_AUTHORS }]
+    })
+
+    useSubscription(BOOK_ADDED, {
+      onSubscriptionData: ({ subscriptionData }) => {
+        console.log(subscriptionData)
+        alert(`Book ${subscriptionData.data.bookAdded.title} was added!`)
+      }
     })
 
     return (
