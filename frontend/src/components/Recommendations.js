@@ -1,33 +1,36 @@
-import React, { useState } from 'react'
+import React from 'react'
+import { useQuery } from 'react-apollo-hooks'
 
-const Books = ({ result, show }) => {
-    const [genre, setGenre] = useState('')
+const Recommendations = ({ booksWithGenreQuery, currentUserResult, show }) => {
+
     if (!show) {
         return null
     }
 
-    if (result.loading) {
+    if (currentUserResult.loading) {
         return (
             <div>Loading...</div>
         )
     }
-    
-    let books = result.data.allBooks || []
-    const genres = result.data.allGenres || []
 
-    if (genre) {
-        books = books.filter(book => book.genres.includes(genre))
+    const currentUser = currentUserResult.data.me
+    if (!currentUser || !currentUser.favoriteGenre) {
+        return (
+            <div>
+               <h2>recommendations</h2>
+                <p>you don't have a favorite genre :(</p>
+            </div>
+        )
     }
+
+    const booksWithGenreResult = useQuery(booksWithGenreQuery, {variables: { genre: currentUser.favoriteGenre }})
+    
+    const books = booksWithGenreResult.data.allBooks || []
 
     return (
         <div>
-            <h2>books</h2>
-            <select onChange={({ target }) => { setGenre(target.value) }}>
-                <option value=''>Choose a genre</option>
-                {genres.map(a =>
-                    <option key={a} value={a} >{a}</option>
-                )}
-            </select>
+            <h2>recommendations</h2>
+            <p>books in your favorite genre <b>{currentUser.favoriteGenre}</b></p>
             <table>
                 <tbody>
                     <tr>
@@ -50,4 +53,4 @@ const Books = ({ result, show }) => {
     )
 }
 
-export default Books
+export default Recommendations

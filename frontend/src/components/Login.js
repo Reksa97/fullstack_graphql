@@ -13,6 +13,7 @@ const Login = ({ login, show, setToken, setPage, setError }) => {
                 variables: { username, password: 'password' }
             })
             setToken(a.data.login.value)
+            localStorage.setItem('books-user-token', a.data.login.value)
             setPage('authors')
         } catch (err) {
             setError('Invalid username')

@@ -10,7 +10,7 @@ const JWT_SECRET = 'VERY_SECRET_KEY_HERE_YESS'
 
 mongoose.set('useFindAndModify', false)
 console.log('connecting to', MONGODB_URI)
-mongoose.connect(MONGODB_URI, { useNewUrlParser: true })
+mongoose.connect(MONGODB_URI, { useUnifiedTopology: true, useNewUrlParser: true })
     .then(() => {
         console.log('connected to MongoDB')
     })
@@ -87,7 +87,7 @@ const resolvers = {
             let author
             if (args.author) {
                 author = await Author.findOne({ name: args.author })
-                console.log('searched for author', args.author, 'gound author', author)
+                console.log('searched for author', args.author, 'found author', author)
             }
 
             if (args.author && args.genre) {
@@ -129,8 +129,12 @@ const resolvers = {
             console.log('returning genres', genres)
             return genres
         },
-        me: async (root, args, context) => {
-            return context.currentUser
+        me: async (root, args, { currentUser }) => {
+            if (!currentUser) {
+                throw new AuthenticationError('User has not authenticated')
+            }
+            console.log('returning me', currentUser)
+            return currentUser
         }
     },
     Mutation: {
