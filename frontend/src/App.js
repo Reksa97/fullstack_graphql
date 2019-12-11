@@ -126,7 +126,9 @@ const App = () => {
     const currentUserResult = useQuery(CURRENT_USER)
 
     const addBook = useMutation(CREATE_BOOK, {
-        refetchQueries: [{ query: ALL_BOOKS_AND_GENRES }, { query: ALL_AUTHORS }]
+        update: (store, response) => {
+          updateCacheWithBook(response.data.addBook)
+        }
     })
 
     const editAuthor = useMutation(EDIT_AUTHOR, {
@@ -136,11 +138,25 @@ const App = () => {
     const login = useMutation(LOGIN, {
         refetchQueries: [{ query: ALL_BOOKS_AND_GENRES }, { query: ALL_AUTHORS }]
     })
+    
+    const updateCacheWithBook = (addedBook) => {
+
+      const dataInStore = client.readQuery({ query: ALL_BOOKS_AND_GENRES })
+      
+      const bookInCache = dataInStore.allBooks.map(b => b.title).includes(addedBook.title)
+      if (!bookInCache) {
+        dataInStore.allBooks.push(addedBook)
+        client.writeQuery({
+          query: ALL_BOOKS_AND_GENRES,
+          data: dataInStore
+        })
+      }
+    }
 
     useSubscription(BOOK_ADDED, {
       onSubscriptionData: ({ subscriptionData }) => {
-        console.log(subscriptionData)
         alert(`Book ${subscriptionData.data.bookAdded.title} was added!`)
+        updateCacheWithBook(subscriptionData.data.bookAdded)
       }
     })
 
